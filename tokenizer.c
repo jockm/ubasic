@@ -66,6 +66,7 @@ static const struct keyword_token keywords[] = {
   {"return", TOKENIZER_RETURN},
   {"call", TOKENIZER_CALL},
   {"rem", TOKENIZER_REM},
+  {"usr", TOKENIZER_USR},
   {"peek", TOKENIZER_PEEK},
   {"poke", TOKENIZER_POKE},
   {"end", TOKENIZER_END},

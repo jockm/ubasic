@@ -39,7 +39,9 @@
 #include "ubasic.h"
 #include "tokenizer.h"
 
+// TODO need to abstract out printf
 #include <stdio.h> /* printf() */
+// TODO need to abstract out exit
 #include <stdlib.h> /* exit() */
 
 //static char const *program_ptr;
@@ -86,6 +88,7 @@ static void gosub_statement(ubasic_info *info);
 static void return_statement(ubasic_info *info);
 static void next_statement(ubasic_info *info);
 static void for_statement(ubasic_info *info);
+static void usr_statement(ubasic_info *info);
 static void peek_statement(ubasic_info *info);
 static void poke_statement(ubasic_info *info);
 static void end_statement(ubasic_info *info);
@@ -518,6 +521,24 @@ for_statement(ubasic_info *info)
 }
 /*---------------------------------------------------------------------------*/
 static void
+usr_statement(ubasic_info *info)
+{
+  VARIABLE_TYPE usr_value;
+  int var;
+
+  accept(info, TOKENIZER_PEEK);
+  usr_value = expr(info);
+  accept(info, TOKENIZER_COMMA);
+  var = ubasic_tokenizer_variable_num(&info->tokenizer_info);
+  accept(info, TOKENIZER_VARIABLE);
+  accept(info, TOKENIZER_CR);
+
+  if(info->usr_function != NULL) {
+	  ubasic_set_variable(info, var, info->usr_function(usr_value, info->app_context));
+  }
+}
+/*---------------------------------------------------------------------------*/
+static void
 peek_statement(ubasic_info *info)
 {
   VARIABLE_TYPE peek_addr;
@@ -531,7 +552,7 @@ peek_statement(ubasic_info *info)
   accept(info, TOKENIZER_CR);
 
   if(info->peek_function != NULL) {
-	  ubasic_set_variable(info, var, info->peek_function(peek_addr));
+	  ubasic_set_variable(info, var, info->peek_function(peek_addr, info->app_context));
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -548,7 +569,7 @@ poke_statement(ubasic_info *info)
   accept(info, TOKENIZER_CR);
 
   if(info->poke_function != NULL) {
-	  info->poke_function(poke_addr, value);
+	  info->poke_function(poke_addr, value, info->app_context);
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -584,6 +605,9 @@ statement(ubasic_info *info)
     break;
   case TOKENIZER_FOR:
     for_statement(info);
+    break;
+  case TOKENIZER_USR:
+    usr_statement(info);
     break;
   case TOKENIZER_PEEK:
     peek_statement(info);

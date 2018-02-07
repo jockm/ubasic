@@ -43,8 +43,9 @@ extern "C" {
 #define MAX_VARNUM 26
 
 
-typedef VARIABLE_TYPE (*peek_func)(VARIABLE_TYPE);
-typedef void (*poke_func)(VARIABLE_TYPE, VARIABLE_TYPE);
+typedef VARIABLE_TYPE (*peek_func)(VARIABLE_TYPE, void *);
+typedef VARIABLE_TYPE (*usr_func)(VARIABLE_TYPE, void *);
+typedef void (*poke_func)(VARIABLE_TYPE, VARIABLE_TYPE, void *);
 
 struct ubasic_for_state {
   int line_after_for;
@@ -60,7 +61,7 @@ struct ubasic_line_index {
 
 
 typedef struct {
-	void *other;
+	void *app_context;
 
 	char const *program_ptr;
 	char string[MAX_STRINGLEN];
@@ -80,6 +81,7 @@ typedef struct {
 
 	peek_func peek_function;
 	poke_func poke_function;
+	usr_func  usr_function;
 
 	ubasic_tokenizer_info tokenizer_info;
 } ubasic_info;
