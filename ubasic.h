@@ -30,6 +30,10 @@
 #ifndef __UBASIC_H__
 #define __UBASIC_H__
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include "vartype.h"
 
 typedef VARIABLE_TYPE (*peek_func)(VARIABLE_TYPE);
@@ -41,5 +45,13 @@ int ubasic_finished(void);
 
 VARIABLE_TYPE ubasic_get_variable(int varnum);
 void ubasic_set_variable(int varum, VARIABLE_TYPE value);
+
+typedef struct {
+	void *other;
+} UBasicInfo;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __UBASIC_H__ */
