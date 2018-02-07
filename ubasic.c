@@ -88,12 +88,18 @@ static void gosub_statement(ubasic_info *info);
 static void return_statement(ubasic_info *info);
 static void next_statement(ubasic_info *info);
 static void for_statement(ubasic_info *info);
+static void input_statement(ubasic_info *info);
 static void usr_statement(ubasic_info *info);
 static void peek_statement(ubasic_info *info);
 static void poke_statement(ubasic_info *info);
 static void end_statement(ubasic_info *info);
 static void statement(ubasic_info *info);
 static void line_statement(ubasic_info *info);
+
+static void print_begin(void *context);
+static void print_num(VARIABLE_TYPE num, void *context);
+static void print_string(const char *str, void *context);
+static void print_end(void *context);
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
@@ -109,6 +115,13 @@ ubasic_init(ubasic_info *info, const char *program)
 
   info->peek_function = NULL;
   info->poke_function = NULL;
+  info->usr_function = NULL;
+  info->input_function = NULL;
+
+  info->print_begin_function = print_begin;
+  info->print_num_function = print_num;
+  info->print_string_function = print_string;
+  info->print_end_function = print_end;
 
   index_free(info);
   ubasic_tokenizer_init(&info->tokenizer_info, program);
@@ -372,26 +385,30 @@ static void
 print_statement(ubasic_info *info)
 {
   accept(info, TOKENIZER_PRINT);
+
+  info->print_begin_function(info);
+
   do {
     DEBUG_PRINTF("Print loop\n");
     if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_STRING) {
       ubasic_tokenizer_string(&info->tokenizer_info, info->string, sizeof(info->string));
-      printf("%s", info->string);
+      info->print_string_function(info->string, info->app_context);
       ubasic_tokenizer_next(&info->tokenizer_info);
     } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_COMMA) {
-      printf(" ");
+        info->print_string_function(info->string, " ");
       ubasic_tokenizer_next(&info->tokenizer_info);
     } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_SEMICOLON) {
       ubasic_tokenizer_next(&info->tokenizer_info);
     } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_VARIABLE ||
           ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_NUMBER) {
-      printf("%d", expr(info));
+        info->print_num_function(expr(info), info->app_context);
     } else {
       break;
     }
   } while(ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_CR &&
       ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_ENDOFINPUT);
-  printf("\n");
+
+  info->print_begin_function(info);
   DEBUG_PRINTF("End of print\n");
   ubasic_tokenizer_next(&info->tokenizer_info);
 }
@@ -521,6 +538,24 @@ for_statement(ubasic_info *info)
 }
 /*---------------------------------------------------------------------------*/
 static void
+input_statement(ubasic_info *info)
+{
+  VARIABLE_TYPE usr_value;
+  int var;
+
+  accept(info, TOKENIZER_PEEK);
+  usr_value = expr(info);
+  accept(info, TOKENIZER_COMMA);
+  var = ubasic_tokenizer_variable_num(&info->tokenizer_info);
+  accept(info, TOKENIZER_VARIABLE);
+  accept(info, TOKENIZER_CR);
+
+  if(info->input_function != NULL) {
+	  ubasic_set_variable(info, var, info->input_function(usr_value, info->app_context));
+  }
+}
+/*---------------------------------------------------------------------------*/
+static void
 usr_statement(ubasic_info *info)
 {
   VARIABLE_TYPE usr_value;
@@ -606,6 +641,9 @@ statement(ubasic_info *info)
   case TOKENIZER_FOR:
     for_statement(info);
     break;
+  case TOKENIZER_INPUT:
+    input_statement(info);
+    break;
   case TOKENIZER_USR:
     usr_statement(info);
     break;
@@ -675,5 +713,29 @@ ubasic_get_variable(ubasic_info *info, int varnum)
     return info->variables[varnum];
   }
   return 0;
+}
+/*---------------------------------------------------------------------------*/
+static void
+print_begin(void *context)
+{
+	// Nothing
+}
+/*---------------------------------------------------------------------------*/
+static void
+print_num(VARIABLE_TYPE num, void *context)
+{
+	printf("%d", num);
+}
+/*---------------------------------------------------------------------------*/
+static void
+print_string(const char *str, void *context)
+{
+	printf("%s", str);
+}
+/*---------------------------------------------------------------------------*/
+static void
+print_end(void *context)
+{
+	printf("\n");
 }
 /*---------------------------------------------------------------------------*/

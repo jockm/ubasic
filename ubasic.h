@@ -45,7 +45,13 @@ extern "C" {
 
 typedef VARIABLE_TYPE (*peek_func)(VARIABLE_TYPE, void *);
 typedef VARIABLE_TYPE (*usr_func)(VARIABLE_TYPE, void *);
+typedef VARIABLE_TYPE (*input_func)(VARIABLE_TYPE, void *);
 typedef void (*poke_func)(VARIABLE_TYPE, VARIABLE_TYPE, void *);
+
+typedef void (*begin_func)(void *);
+typedef void (*handle_num_func)(VARIABLE_TYPE, void *);
+typedef void (*handle_string_func)(const char *, void *);
+typedef void (*end_func)(void *);
 
 struct ubasic_for_state {
   int line_after_for;
@@ -82,6 +88,12 @@ typedef struct {
 	peek_func peek_function;
 	poke_func poke_function;
 	usr_func  usr_function;
+	input_func input_function;
+
+	begin_func print_begin_function;
+	handle_num_func print_num_function;
+	handle_string_func print_string_function;
+	end_func print_end_function;
 
 	ubasic_tokenizer_info tokenizer_info;
 } ubasic_info;
