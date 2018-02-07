@@ -35,20 +35,63 @@ extern "C" {
 #endif
 
 #include "vartype.h"
+#include "tokenizer.h"
+
+#define MAX_STRINGLEN 40
+#define MAX_GOSUB_STACK_DEPTH 10
+#define MAX_FOR_STACK_DEPTH 4
+#define MAX_VARNUM 26
+
 
 typedef VARIABLE_TYPE (*peek_func)(VARIABLE_TYPE);
 typedef void (*poke_func)(VARIABLE_TYPE, VARIABLE_TYPE);
 
-void ubasic_init(const char *program);
-void ubasic_run(void);
-int ubasic_finished(void);
+struct ubasic_for_state {
+  int line_after_for;
+  int for_variable;
+  int to;
+};
 
-VARIABLE_TYPE ubasic_get_variable(int varnum);
-void ubasic_set_variable(int varum, VARIABLE_TYPE value);
+struct ubasic_line_index {
+  int line_number;
+  char const *program_text_position;
+  struct ubasic_line_index *next;
+};
+
 
 typedef struct {
 	void *other;
-} UBasicInfo;
+
+	char const *program_ptr;
+	char string[MAX_STRINGLEN];
+
+	int gosub_stack[MAX_GOSUB_STACK_DEPTH];
+	int gosub_stack_ptr;
+
+	struct ubasic_for_state for_stack[MAX_FOR_STACK_DEPTH];
+	int for_stack_ptr;
+
+	struct ubasic_line_index *line_index_head;
+	struct ubasic_line_index *line_index_current;
+
+	VARIABLE_TYPE variables[MAX_VARNUM];
+
+	int ended;
+
+	peek_func peek_function;
+	poke_func poke_function;
+
+	ubasic_tokenizer_info tokenizer_info;
+} ubasic_info;
+
+
+void ubasic_init(ubasic_info *info, const char *program);
+void ubasic_run(ubasic_info *info);
+int ubasic_finished(ubasic_info *info);
+
+VARIABLE_TYPE ubasic_get_variable(ubasic_info *info, int varnum);
+void ubasic_set_variable(ubasic_info *info, int varum, VARIABLE_TYPE value);
+
 
 #ifdef __cplusplus
 }

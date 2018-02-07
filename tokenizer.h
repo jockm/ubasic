@@ -72,17 +72,23 @@ enum {
   TOKENIZER_CR,
 };
 
-void tokenizer_goto(const char *program);
-void tokenizer_init(const char *program);
-void tokenizer_next(void);
-int tokenizer_token(void);
-VARIABLE_TYPE tokenizer_num(void);
-int tokenizer_variable_num(void);
-void tokenizer_string(char *dest, int len);
+typedef struct {
+	char const *ptr;
+	char const *nextptr;
+	int current_token;
+} ubasic_tokenizer_info;
 
-int tokenizer_finished(void);
-void tokenizer_error_print(void);
+void ubasic_tokenizer_goto(ubasic_tokenizer_info *info, const char *program);
+void ubasic_tokenizer_init(ubasic_tokenizer_info *info, const char *program);
+void ubasic_tokenizer_next(ubasic_tokenizer_info *info);
+int ubasic_tokenizer_token(ubasic_tokenizer_info *info);
+VARIABLE_TYPE ubasic_tokenizer_num(ubasic_tokenizer_info *info);
+int ubasic_tokenizer_variable_num(ubasic_tokenizer_info *info);
+void ubasic_tokenizer_string(ubasic_tokenizer_info *info, char *dest, int len);
 
-char const *tokenizer_pos(void);
+int ubasic_tokenizer_finished(ubasic_tokenizer_info *info);
+void ubasic_tokenizer_error_print(ubasic_tokenizer_info *info);
+
+char const *ubasic_tokenizer_pos(ubasic_tokenizer_info *info);
 
 #endif /* __TOKENIZER_H__ */
