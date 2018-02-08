@@ -89,7 +89,6 @@ static void return_statement(ubasic_info *info);
 static void next_statement(ubasic_info *info);
 static void for_statement(ubasic_info *info);
 static void input_statement(ubasic_info *info);
-static void usr_statement(ubasic_info *info);
 static void peek_statement(ubasic_info *info);
 static void poke_statement(ubasic_info *info);
 static void end_statement(ubasic_info *info);
