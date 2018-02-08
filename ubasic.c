@@ -286,7 +286,7 @@ relation(ubasic_info *info)
 static void
 index_free(ubasic_info *info) {
   if(info->line_index_head != NULL) {
-	  info->line_index_current = info->line_index_head;
+    info->line_index_current = info->line_index_head;
     do {
       DEBUG_PRINTF("Freeing index for line %d.\n", line_index_current);
       info->line_index_head = info->line_index_current;
@@ -340,11 +340,11 @@ index_add(ubasic_info *info, int linenum, char const* sourcepos) {
   new_lidx->next = NULL;
 
   if(info->line_index_head != NULL) {
-	  info->line_index_current->next = new_lidx;
-	  info->line_index_current = info->line_index_current->next;
+    info->line_index_current->next = new_lidx;
+    info->line_index_current = info->line_index_current->next;
   } else {
-	  info->line_index_current = new_lidx;
-	  info->line_index_head = info->line_index_current;
+    info->line_index_current = new_lidx;
+    info->line_index_head = info->line_index_current;
   }
   DEBUG_PRINTF("index_add: Adding index for line %d: %d.\n", linenum,
                sourcepos);
@@ -472,8 +472,8 @@ gosub_statement(ubasic_info *info)
   accept(info, TOKENIZER_NUMBER);
   accept(info, TOKENIZER_CR);
   if(info->gosub_stack_ptr < MAX_GOSUB_STACK_DEPTH) {
-	  info->gosub_stack[info->gosub_stack_ptr] = ubasic_tokenizer_num(&info->tokenizer_info);
-	  info->gosub_stack_ptr++;
+    info->gosub_stack[info->gosub_stack_ptr] = ubasic_tokenizer_num(&info->tokenizer_info);
+    info->gosub_stack_ptr++;
     jump_linenum(info, linenum);
   } else {
     DEBUG_PRINTF("gosub_statement: gosub stack exhausted\n");
@@ -485,7 +485,7 @@ return_statement(ubasic_info *info)
 {
   accept(info, TOKENIZER_RETURN);
   if(info->gosub_stack_ptr > 0) {
-	  info->gosub_stack_ptr--;
+    info->gosub_stack_ptr--;
     jump_linenum(info, info->gosub_stack[info->gosub_stack_ptr]);
   } else {
     DEBUG_PRINTF("return_statement: non-matching return\n");
@@ -507,7 +507,7 @@ next_statement(ubasic_info *info)
     if(ubasic_get_variable(info, var) <= info->for_stack[info->for_stack_ptr - 1].to) {
       jump_linenum(info, info->for_stack[info->for_stack_ptr - 1].line_after_for);
     } else {
-    	info->for_stack_ptr--;
+      info->for_stack_ptr--;
       accept(info, TOKENIZER_CR);
     }
   } else {
@@ -532,10 +532,10 @@ for_statement(ubasic_info *info)
   accept(info, TOKENIZER_CR);
 
   if(info->for_stack_ptr < MAX_FOR_STACK_DEPTH) {
-	  info->for_stack[info->for_stack_ptr].line_after_for = ubasic_tokenizer_num(&info->tokenizer_info);
-	  info->for_stack[info->for_stack_ptr].for_variable = for_variable;
-	  info->for_stack[info->for_stack_ptr].to = to;
-	  DEBUG_PRINTF("for_statement: new for, var %d to %d\n",
+    info->for_stack[info->for_stack_ptr].line_after_for = ubasic_tokenizer_num(&info->tokenizer_info);
+    info->for_stack[info->for_stack_ptr].for_variable = for_variable;
+    info->for_stack[info->for_stack_ptr].to = to;
+    DEBUG_PRINTF("for_statement: new for, var %d to %d\n",
                 for_stack[for_stack_ptr].for_variable,
                 for_stack[for_stack_ptr].to);
 
@@ -559,58 +559,55 @@ input_statement(ubasic_info *info)
   accept(info, TOKENIZER_CR);
 
   if(info->input_function != NULL) {
-	  ubasic_set_variable(info, var, info->input_function(usr_value, info->app_context));
+    ubasic_set_variable(info, var, info->input_function(usr_value, info->app_context));
   }
 }
 /*---------------------------------------------------------------------------*/
 static void
 user_statement(ubasic_info *info)
 {
-	accept(info, TOKENIZER_USER);
+  accept(info, TOKENIZER_USER);
 
-	  info->user_begin_function(info);
+  info->user_begin_function(info);
 
-	  do {
-	    DEBUG_PRINTF("User loop\n");
-	    if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_STRING) {
-	      ubasic_tokenizer_string(&info->tokenizer_info, info->string, sizeof(info->string));
+  do {
+    DEBUG_PRINTF("User loop\n");
+    if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_STRING) {
+      ubasic_tokenizer_string(&info->tokenizer_info, info->string, sizeof(info->string));
 
-	      if(info->user_string_function != NULL) {
-	    	  info->user_string_function(info->string, info->app_context);
-	      }
+      if(info->user_string_function != NULL) {
+        info->user_string_function(info->string, info->app_context);
+      }
 
-	      ubasic_tokenizer_next(&info->tokenizer_info);
-	    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_COMMA) {
+      ubasic_tokenizer_next(&info->tokenizer_info);
+    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_COMMA) {
+      if(info->user_separator_function != NULL) {
+        info->user_separator_function(',', info->app_context);
+      }
 
-		      if(info->user_separator_function != NULL) {
-		    	  info->user_separator_function(',', info->app_context);
-		      }
+      ubasic_tokenizer_next(&info->tokenizer_info);
+    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_SEMICOLON) {
+      if(info->user_separator_function != NULL) {
+        info->user_separator_function(';', info->app_context);
+      }
 
-		    	  ubasic_tokenizer_next(&info->tokenizer_info);
-	    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_SEMICOLON) {
-		      if(info->user_separator_function != NULL) {
-		    	  info->user_separator_function(';', info->app_context);
-		      }
+      ubasic_tokenizer_next(&info->tokenizer_info);
+    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_VARIABLE ||
+      ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_NUMBER) {
 
-	      ubasic_tokenizer_next(&info->tokenizer_info);
+      if(info->user_separator_function != NULL) {
+        info->user_num_function(expr(info), info->app_context);
+      }
+    } else {
+      break;
+    }
+  } while(ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_CR &&
+          ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_ENDOFINPUT);
 
-	    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_VARIABLE ||
+  info->user_end_function(info);
 
-	          ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_NUMBER) {
-
-		      if(info->user_separator_function != NULL) {
-		    	  info->user_num_function(expr(info), info->app_context);
-		      }
-	    } else {
-	      break;
-	    }
-	  } while(ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_CR &&
-	      ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_ENDOFINPUT);
-
-	  info->user_end_function(info);
-
-	  DEBUG_PRINTF("End of User\n");
-	  ubasic_tokenizer_next(&info->tokenizer_info);
+  DEBUG_PRINTF("End of User\n");
+  ubasic_tokenizer_next(&info->tokenizer_info);
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -627,7 +624,7 @@ peek_statement(ubasic_info *info)
   accept(info, TOKENIZER_CR);
 
   if(info->peek_function != NULL) {
-	  ubasic_set_variable(info, var, info->peek_function(peek_addr, info->app_context));
+    ubasic_set_variable(info, var, info->peek_function(peek_addr, info->app_context));
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -644,7 +641,7 @@ poke_statement(ubasic_info *info)
   accept(info, TOKENIZER_CR);
 
   if(info->poke_function != NULL) {
-	  info->poke_function(poke_addr, value, info->app_context);
+    info->poke_function(poke_addr, value, info->app_context);
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -742,7 +739,7 @@ void
 ubasic_set_variable(ubasic_info *info, int varnum, VARIABLE_TYPE value)
 {
   if(varnum >= 0 && varnum <= MAX_VARNUM) {
-	  info->variables[varnum] = value;
+    info->variables[varnum] = value;
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -758,30 +755,30 @@ ubasic_get_variable(ubasic_info *info, int varnum)
 static void
 print_begin(void *context)
 {
-	// Nothing
+   // Nothing
 }
 /*---------------------------------------------------------------------------*/
 static void
 print_num(VARIABLE_TYPE num, void *context)
 {
-	printf("%d", num);
+  printf("%d", num);
 }
 /*---------------------------------------------------------------------------*/
 static void
 print_string(const char *str, void *context)
 {
-	printf("%s", str);
+  printf("%s", str);
 }
 /*---------------------------------------------------------------------------*/
 static void
 print_separator(const char sep, void *context)
 {
-	printf("%s", " ");
+  printf("%s", " ");
 }
 /*---------------------------------------------------------------------------*/
 static void
 print_end(void *context)
 {
-	printf("\n");
+  printf("\n");
 }
 /*---------------------------------------------------------------------------*/

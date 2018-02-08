@@ -68,42 +68,42 @@ struct ubasic_line_index {
 
 
 typedef struct {
-	void *app_context;
+  void *app_context;
 
-	char const *program_ptr;
-	char string[MAX_STRINGLEN];
+  char const *program_ptr;
+  char string[MAX_STRINGLEN];
 
-	int gosub_stack[MAX_GOSUB_STACK_DEPTH];
-	int gosub_stack_ptr;
+  int gosub_stack[MAX_GOSUB_STACK_DEPTH];
+  int gosub_stack_ptr;
 
-	struct ubasic_for_state for_stack[MAX_FOR_STACK_DEPTH];
-	int for_stack_ptr;
+  struct ubasic_for_state for_stack[MAX_FOR_STACK_DEPTH];
+  int for_stack_ptr;
 
-	struct ubasic_line_index *line_index_head;
-	struct ubasic_line_index *line_index_current;
+  struct ubasic_line_index *line_index_head;
+  struct ubasic_line_index *line_index_current;
 
-	VARIABLE_TYPE variables[MAX_VARNUM];
+  VARIABLE_TYPE variables[MAX_VARNUM];
 
-	int ended;
+  int ended;
 
-	peek_func peek_function;
-	poke_func poke_function;
-	usr_func  usr_function;
-	input_func input_function;
+  peek_func peek_function;
+  poke_func poke_function;
+  usr_func  usr_function;
+  input_func input_function;
 
-	begin_func print_begin_function;
-	handle_num_func print_num_function;
-	handle_string_func print_string_function;
-	handle_separator_func print_separator_function;
-	end_func print_end_function;
+  begin_func print_begin_function;
+  handle_num_func print_num_function;
+  handle_string_func print_string_function;
+  handle_separator_func print_separator_function;
+  end_func print_end_function;
 
-	begin_func user_begin_function;
-	handle_num_func user_num_function;
-	handle_string_func user_string_function;
-	handle_separator_func user_separator_function;
-	end_func user_end_function;
+  begin_func user_begin_function;
+  handle_num_func user_num_function;
+  handle_string_func user_string_function;
+  handle_separator_func user_separator_function;
+  end_func user_end_function;
 
-	ubasic_tokenizer_info tokenizer_info;
+  ubasic_tokenizer_info tokenizer_info;
 } ubasic_info;
 
 
