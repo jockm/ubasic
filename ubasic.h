@@ -51,6 +51,7 @@ typedef void (*poke_func)(VARIABLE_TYPE, VARIABLE_TYPE, void *);
 typedef void (*begin_func)(void *);
 typedef void (*handle_num_func)(VARIABLE_TYPE, void *);
 typedef void (*handle_string_func)(const char *, void *);
+typedef void (*handle_separator_func)(const char, void *);
 typedef void (*end_func)(void *);
 
 struct ubasic_for_state {
@@ -93,7 +94,14 @@ typedef struct {
 	begin_func print_begin_function;
 	handle_num_func print_num_function;
 	handle_string_func print_string_function;
+	handle_separator_func print_separator_function;
 	end_func print_end_function;
+
+	begin_func user_begin_function;
+	handle_num_func user_num_function;
+	handle_string_func user_string_function;
+	handle_separator_func user_separator_function;
+	end_func user_end_function;
 
 	ubasic_tokenizer_info tokenizer_info;
 } ubasic_info;

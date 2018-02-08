@@ -99,6 +99,7 @@ static void line_statement(ubasic_info *info);
 static void print_begin(void *context);
 static void print_num(VARIABLE_TYPE num, void *context);
 static void print_string(const char *str, void *context);
+static void print_separator(const char sep, void *context);
 static void print_end(void *context);
 /*---------------------------------------------------------------------------*/
 
@@ -121,7 +122,14 @@ ubasic_init(ubasic_info *info, const char *program)
   info->print_begin_function = print_begin;
   info->print_num_function = print_num;
   info->print_string_function = print_string;
+  info->print_separator_function = print_separator;
   info->print_end_function = print_end;
+
+  info->user_begin_function = NULL;
+  info->user_num_function = NULL;
+  info->user_separator_function = NULL;
+  info->user_string_function = NULL;
+  info->user_end_function = NULL;
 
   index_free(info);
   ubasic_tokenizer_init(&info->tokenizer_info, program);
@@ -395,7 +403,7 @@ print_statement(ubasic_info *info)
       info->print_string_function(info->string, info->app_context);
       ubasic_tokenizer_next(&info->tokenizer_info);
     } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_COMMA) {
-        info->print_string_function(info->string, " ");
+        info->print_separator_function(',', info->app_context);
       ubasic_tokenizer_next(&info->tokenizer_info);
     } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_SEMICOLON) {
       ubasic_tokenizer_next(&info->tokenizer_info);
@@ -408,7 +416,7 @@ print_statement(ubasic_info *info)
   } while(ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_CR &&
       ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_ENDOFINPUT);
 
-  info->print_begin_function(info);
+  info->print_end_function(info);
   DEBUG_PRINTF("End of print\n");
   ubasic_tokenizer_next(&info->tokenizer_info);
 }
@@ -556,21 +564,53 @@ input_statement(ubasic_info *info)
 }
 /*---------------------------------------------------------------------------*/
 static void
-usr_statement(ubasic_info *info)
+user_statement(ubasic_info *info)
 {
-  VARIABLE_TYPE usr_value;
-  int var;
+	accept(info, TOKENIZER_USER);
 
-  accept(info, TOKENIZER_PEEK);
-  usr_value = expr(info);
-  accept(info, TOKENIZER_COMMA);
-  var = ubasic_tokenizer_variable_num(&info->tokenizer_info);
-  accept(info, TOKENIZER_VARIABLE);
-  accept(info, TOKENIZER_CR);
+	  info->user_begin_function(info);
 
-  if(info->usr_function != NULL) {
-	  ubasic_set_variable(info, var, info->usr_function(usr_value, info->app_context));
-  }
+	  do {
+	    DEBUG_PRINTF("User loop\n");
+	    if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_STRING) {
+	      ubasic_tokenizer_string(&info->tokenizer_info, info->string, sizeof(info->string));
+
+	      if(info->user_string_function != NULL) {
+	    	  info->user_string_function(info->string, info->app_context);
+	      }
+
+	      ubasic_tokenizer_next(&info->tokenizer_info);
+	    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_COMMA) {
+
+		      if(info->user_separator_function != NULL) {
+		    	  info->user_separator_function(',', info->app_context);
+		      }
+
+		    	  ubasic_tokenizer_next(&info->tokenizer_info);
+	    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_SEMICOLON) {
+		      if(info->user_separator_function != NULL) {
+		    	  info->user_separator_function(';', info->app_context);
+		      }
+
+	      ubasic_tokenizer_next(&info->tokenizer_info);
+
+	    } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_VARIABLE ||
+
+	          ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_NUMBER) {
+
+		      if(info->user_separator_function != NULL) {
+		    	  info->user_num_function(expr(info), info->app_context);
+		      }
+	    } else {
+	      break;
+	    }
+	  } while(ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_CR &&
+	      ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_ENDOFINPUT);
+
+	  info->user_end_function(info);
+
+	  DEBUG_PRINTF("End of User\n");
+	  ubasic_tokenizer_next(&info->tokenizer_info);
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -644,8 +684,8 @@ statement(ubasic_info *info)
   case TOKENIZER_INPUT:
     input_statement(info);
     break;
-  case TOKENIZER_USR:
-    usr_statement(info);
+  case TOKENIZER_USER:
+    user_statement(info);
     break;
   case TOKENIZER_PEEK:
     peek_statement(info);
@@ -731,6 +771,12 @@ static void
 print_string(const char *str, void *context)
 {
 	printf("%s", str);
+}
+/*---------------------------------------------------------------------------*/
+static void
+print_separator(const char sep, void *context)
+{
+	printf("%s", " ");
 }
 /*---------------------------------------------------------------------------*/
 static void
