@@ -88,7 +88,6 @@ typedef struct {
 
   peek_func peek_function;
   poke_func poke_function;
-  usr_func  usr_function;
   input_func input_function;
 
   begin_func print_begin_function;

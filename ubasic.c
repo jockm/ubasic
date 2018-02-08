@@ -116,7 +116,6 @@ ubasic_init(ubasic_info *info, const char *program)
 
   info->peek_function = NULL;
   info->poke_function = NULL;
-  info->usr_function = NULL;
   info->input_function = NULL;
 
   info->print_begin_function = print_begin;
