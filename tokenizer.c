@@ -164,13 +164,6 @@ get_next_token(ubasic_tokenizer_info *info)
     } while(*info->nextptr != '"');
     ++info->nextptr;
     return TOKENIZER_STRING;
-  } else if(*info->ptr == '\'') {
-	  info->nextptr = info->ptr;
-    do {
-      ++info->nextptr;
-    } while(*info->nextptr != '\'');
-    ++info->nextptr;
-    return TOKENIZER_STRING;
   } else {
     for(kt = keywords; kt->keyword != NULL; ++kt) {
       if(strncmp(info->ptr, kt->keyword, strlen(kt->keyword)) == 0) {
