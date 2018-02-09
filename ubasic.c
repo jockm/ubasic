@@ -392,29 +392,44 @@ print_statement(ubasic_info *info)
 {
   accept(info, TOKENIZER_PRINT);
 
-  info->print_begin_function(info);
+  if(info->print_begin_function != NULL) {
+	  info->print_begin_function(info->app_context);
+  }
 
   do {
     DEBUG_PRINTF("Print loop\n");
     if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_STRING) {
       ubasic_tokenizer_string(&info->tokenizer_info, info->string, sizeof(info->string));
-      info->print_string_function(info->string, info->app_context);
+
+      if(info->print_string_function != NULL) {
+    	  info->print_string_function(info->string, info->app_context);
+      }
+
       ubasic_tokenizer_next(&info->tokenizer_info);
     } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_COMMA) {
-        info->print_separator_function(',', info->app_context);
+
+    	if(info->print_separator_function != NULL) {
+    		info->print_separator_function(',', info->app_context);
+    	}
+
       ubasic_tokenizer_next(&info->tokenizer_info);
     } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_SEMICOLON) {
       ubasic_tokenizer_next(&info->tokenizer_info);
     } else if(ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_VARIABLE ||
           ubasic_tokenizer_token(&info->tokenizer_info) == TOKENIZER_NUMBER) {
-        info->print_num_function(expr(info), info->app_context);
+
+    	if(info->print_num_function != NULL) {
+    		info->print_num_function(expr(info), info->app_context);
+    	}
     } else {
       break;
     }
   } while(ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_CR &&
       ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_ENDOFINPUT);
 
-  info->print_end_function(info);
+  if(info->print_end_function != NULL) {
+	  info->print_end_function(info->app_context);
+  }
   DEBUG_PRINTF("End of print\n");
   ubasic_tokenizer_next(&info->tokenizer_info);
 }
@@ -566,7 +581,7 @@ user_statement(ubasic_info *info)
 {
   accept(info, TOKENIZER_USER);
 
-  info->user_begin_function(info);
+  info->user_begin_function(info->app_context);
 
   do {
     DEBUG_PRINTF("User loop\n");
@@ -602,7 +617,9 @@ user_statement(ubasic_info *info)
   } while(ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_CR &&
           ubasic_tokenizer_token(&info->tokenizer_info) != TOKENIZER_ENDOFINPUT);
 
-  info->user_end_function(info);
+  if(info->user_end_function != NULL) {
+	  info->user_end_function(info->app_context);
+  }
 
   DEBUG_PRINTF("End of User\n");
   ubasic_tokenizer_next(&info->tokenizer_info);
