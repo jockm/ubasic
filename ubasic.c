@@ -564,7 +564,7 @@ input_statement(ubasic_info *info)
   VARIABLE_TYPE usr_value;
   int var;
 
-  accept(info, TOKENIZER_PEEK);
+  accept(info, TOKENIZER_INPUT);
   usr_value = expr(info);
   accept(info, TOKENIZER_COMMA);
   var = ubasic_tokenizer_variable_num(&info->tokenizer_info);
